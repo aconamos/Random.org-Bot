@@ -12,8 +12,13 @@ client = discord.Client()
 
 colors = [0x0db2ff, 0x0c5913, 0xbf1600]
 
-
-default_params = {'c':'1', 'cols':'1'}
+class intparams():
+    def __init__(self, min, max, count = 1, cols = 1, base = 10):
+        self.count = count
+        self.cols = cols
+        self.min = min
+        self.max = max
+        self.base = base
 
 
 @client.event
@@ -30,23 +35,27 @@ async def on_message(message):
     if message.content.startswith('?int'):
         inp = str(message.content).replace('?int ', '')
 
-        paramsdict = await return_paramsdict(inp)
+        # paramsdict = await return_paramsdict(inp)
 
-        print('paramslist: {}'.format(paramsdict))
-        for param in paramsdict:
-            print('for print: {}'.format(param))
+        # print('paramsdict: {}'.format(paramsdict))
+        # for param in paramsdict:
+        #     print('for print: {}'.format(param))
 
-        count = paramsdict['c']
+        # count = paramsdict['c']
 
-        print(count)
+        # print(count)
 
-        
 
-# note that raw input must have no command prefix
-async def return_paramsdict(rawinput):
-    params = rawinput.split(' ', 2)
-    params.pop(0)
-    params.pop(0)
+        print(return_fullparamsclass(inp))
+
+
+# note that input must have no command prefix
+async def return_paramsdict(inp):
+    params = inp.split(' ', 2)
+    min = params.pop(0)
+    max = params.pop(0)
+
+    print(params)
 
     _params = str(params).replace('[\'', '')
     _params = _params.replace('\']', '')
@@ -55,6 +64,9 @@ async def return_paramsdict(rawinput):
     paramslist.pop(0)
 
     _dict = {}
+
+    _dict['min'] = str(min)
+    _dict['max'] = str(max)
 
     for param in paramslist:
         parameter = param.split(' ', 1)
@@ -67,11 +79,26 @@ async def return_paramsdict(rawinput):
     return _dict
 
 
-async def int_req(min, max, amount = 1):
-    return(requests.get('https://www.random.org/integers/?num={}&min={}&max={}&col=1&base=10&format=plain&rnd=new'.format(amount, min, max)).text)
+# possible params - col, count
+
+# note that input must have no command prefix
+async def return_fullparamsclass(inp):
+    params = await return_paramsdict(inp)
+    
+    _info = intparams()
+
+    _info.min = params['min']
+    _info.max = params['max']
+    _info.count = params['count']
+    _info.cols = params['cols']
+    _info.base = params['base']
+
+    return _info
 
 
-async def col_req(min, max, cols, amount = 1):
-    return(requests.get('https://www.random.org/integers/?num={}&min={}&max={}&col={}&base=10&format=plain&rnd=new'.format(amount, min, max, cols)).text)
+
+async def int_req(amount, min, max, cols, base):
+    return(requests.get('https://www.random.org/integers/?num={}&min={}&max={}&col={}&base={}&format=plain&rnd=new'.format(amount, min, max, cols, base)).text)
+
 
 client.run(TOKEN)
